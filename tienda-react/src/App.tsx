@@ -8,6 +8,8 @@ import Layout from "./ui/layout/Layout"
 import NoEncontrada from "./ui/pages/NoEncontrada"
 import Checkout from "./ui/pages/Checkout"
 import Login from "./ui/pages/Login";
+import Registro from "./ui/pages/Registro";
+import Contacto from "./ui/pages/Contacto";
 import RutaProtegida from "./ui/components/RutaProtegida";
 
 export default function App() {
@@ -56,6 +58,12 @@ export default function App() {
         </Route>
         <Route path="/login" element = {
           <Login/>
+        }/>
+        <Route path="/registro" element = {
+          <Registro/>
+        }/>
+        <Route path="/contacto" element = {
+          <Contacto/>
         }/>
       </Route>
       <Route path="*" element ={

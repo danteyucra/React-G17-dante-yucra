@@ -17,6 +17,7 @@ export default function Header ( {nombre , eslogan = "Tecnologia para todos"} : 
                 <nav className="mt-2 flex gap-4">
                     <NavLink to="/" className={({isActive}) => (isActive ? 'font-bold underline' : 'hover:underline')}>Catalogo</NavLink>
                     <NavLink to="/checkout" className={({isActive}) => (isActive ? 'font-bold underline' : 'hover:underline')}>Checkout</NavLink>
+                    <NavLink to="/contacto" className={({isActive}) => (isActive ? 'font-bold underline' : 'hover:underline')}>Contacto</NavLink>
                 </nav>
             </div>
             <p>{unidades} productos - {formatearPrecio(total)}</p>
@@ -26,7 +27,11 @@ export default function Header ( {nombre , eslogan = "Tecnologia para todos"} : 
                         <button className="ml-2 underline" onClick={salir}>Salir</button>
                     </p>
                 ) : (
-                    <Link to="/login" className="text-sm underline">Inicie Sesion</Link>
+                    <p className="text-sm">
+                        <Link to="/login" className="underline">Inicie Sesion</Link>
+                        <span> o </span>
+                        <Link to="/registro" className="underline">Registrese</Link>
+                    </p>
                 )
             }
         </header>
