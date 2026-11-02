@@ -73,7 +73,7 @@ export default function Checkout () {
             </label>
             <label className="flex flex-col text-sm">
                 Correo electronico
-                <input type="text" className="rounded border px-3 py-2" value={form.email} 
+                <input type="email" className="rounded border px-3 py-2" value={form.email} 
                     onChange={cambiar('email')} onBlur={marcar('email')}/>
                 {
                     tocados.email && errores.email &&(

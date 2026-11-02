@@ -20,7 +20,7 @@ export default function App() {
     const controlador = new AbortController();
     async function cargar () {
       try {
-        const resultado = await obtenerProductos();
+        const resultado = await obtenerProductos(controlador.signal);
         setProductos(resultado.productos);
         setEsRespaldo(resultado.esRespaldo);
         setEstado('listo');
@@ -45,7 +45,7 @@ export default function App() {
         }
         />
         <Route  path="/producto/:id" element = {
-          <Detalle productos={productos}/>
+          <Detalle productos={productos} estado={estado}/>
         }
         />
         <Route element={<RutaProtegida/>}>

@@ -1,16 +1,20 @@
 import { Link, useParams } from "react-router-dom";
-import type { Producto } from "../../dominio/tipos";
+import type { EstadoCarga, Producto } from "../../dominio/tipos";
 import EtiquetaStock from "../components/EtiquetaStock";
 import formatearPrecio from "../formato";
 import { useCart } from "../../aplicacion/useCart";
 
 interface Props {
     productos : Producto [];
+    estado : EstadoCarga;
 }
-export default function Detalle ( {productos} : Props) {
+export default function Detalle ( {productos, estado} : Props) {
     const {id} = useParams();
     const {agregar} = useCart();
     const producto = productos.find( (p) => p.id === Number(id));
+    if(estado === 'cargando') {
+        return <p className="p-6 text-gray-500">Cargando producto...</p>;
+    }
     if(!producto) {
         return (
             <div className="p-6">
