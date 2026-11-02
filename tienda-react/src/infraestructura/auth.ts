@@ -39,3 +39,25 @@ export async function obtenerPerfil (token : string, signal? : AbortSignal) : Pr
     });
     if(!r.ok) throw new Error (`Sesion rechazada por el servidor (HTTP ${r.status})`);
 }
+
+export interface DatosRegistro {
+    nombre : string;
+    usuario : string;
+    email : string;
+    clave : string;
+}
+
+export async function registrarUsuario (datos : DatosRegistro, signal? : AbortSignal) : Promise<void> {
+    const r = await fetch(`${BASE}/users/add`, {
+        method: 'POST',
+        headers: { 'Content-Type' : 'application/json' },
+        body: JSON.stringify({
+            firstName: datos.nombre,
+            username: datos.usuario,
+            email: datos.email,
+            password: datos.clave
+        }),
+        signal
+    });
+    if(!r.ok) throw new Error (`No se pudo crear la cuenta (HTTP ${r.status})`);
+}
