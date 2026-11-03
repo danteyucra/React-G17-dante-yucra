@@ -1,21 +1,31 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { EstadoCarga, Producto } from "../../dominio/tipos";
 import EtiquetaStock from "../components/EtiquetaStock";
 import formatearPrecio from "../formato";
 import { useCart } from "../../aplicacion/useCart";
+import { obtenerProducto } from "../../infraestructura/api";
 
-interface Props {
-    productos : Producto [];
-    estado : EstadoCarga;
-}
-export default function Detalle ( {productos, estado} : Props) {
+export default function Detalle () {
     const {id} = useParams();
     const {agregar} = useCart();
-    const producto = productos.find( (p) => p.id === Number(id));
+    const [producto, setProducto] = useState<Producto | null>(null);
+    const [estado, setEstado] = useState<EstadoCarga>('cargando');
+    useEffect(() => {
+        const controlador = new AbortController();
+        setEstado('cargando');
+        obtenerProducto(Number(id), controlador.signal)
+            .then((p) => { setProducto(p); setEstado('listo'); })
+            .catch((error : unknown) => {
+                if(error instanceof DOMException && error.name === 'AbortError') return;
+                setEstado('error');
+            });
+        return () => controlador.abort();
+    }, [id]);
     if(estado === 'cargando') {
         return <p className="p-6 text-gray-500">Cargando producto...</p>;
     }
-    if(!producto) {
+    if(estado === 'error' || !producto) {
         return (
             <div className="p-6">
                 <p className="text-gray-500">Producto no encontrado</p>

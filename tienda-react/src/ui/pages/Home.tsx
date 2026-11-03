@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { EstadoCarga, Producto } from "../../dominio/tipos";
 import SkeletonCard from "../components/SkeletonCard";
 import ProductCard from "../components/ProductCard";
+import Paginacion from "../components/Paginacion";
 import { useCart } from "../../aplicacion/useCart";
 
 interface Props {
@@ -9,10 +10,13 @@ interface Props {
     OnReintentar : () => void;
     productos : Producto[];
     estado : EstadoCarga;
+    pagina : number;
+    totalPaginas : number;
+    onCambiarPagina : (n : number) => void;
 }   
 const nombreTienda = 'Tienda Tech';
 
-export function Home ( {esRespaldo, OnReintentar, productos, estado} : Props) {
+export function Home ( {esRespaldo, OnReintentar, productos, estado, pagina, totalPaginas, onCambiarPagina} : Props) {
     const {agregar} = useCart();
     const categorias = ['todas', ...new Set(productos.map(p => p.categoria))];
     const [categoriaActiva, setCategoriaActiva] = useState<string>('todas');
@@ -74,6 +78,9 @@ export function Home ( {esRespaldo, OnReintentar, productos, estado} : Props) {
                 </section>
                 )
             }
+            {estado === 'listo' && totalPaginas > 1 && (
+                <Paginacion pagina={pagina} totalPaginas={totalPaginas} onCambiar={onCambiarPagina}/>
+            )}
         </>
     )
 }
