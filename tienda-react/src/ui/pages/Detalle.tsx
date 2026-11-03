@@ -25,9 +25,10 @@ export default function Detalle ( {productos, estado} : Props) {
     }
     return (
         <article className="flex flex-wrap gap-8 p-6">
+            <Link to="/" className="w-full text-sm underline">Volver al catalogo</Link>
             <img src={producto.imagen} alt={producto.nombre} className="w-72 rounded-xl object-contain" />
             <div>
-                <p className="text-sm text-gray-500">{producto.marca}</p>
+                <p className="text-sm text-gray-500">{producto.marca} · {producto.categoria}</p>
                 <h1 className="text-2xl font-bold">{producto.nombre}</h1>
                 <EtiquetaStock stock={producto.stock}></EtiquetaStock>
                 <p className="mt-2 text-xl">{formatearPrecio(producto.precio * 1.18)} con IGV</p>
