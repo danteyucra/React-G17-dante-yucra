@@ -78,7 +78,7 @@ export function Home ( {esRespaldo, OnReintentar, productos, estado, pagina, tot
                 </section>
                 )
             }
-            {estado === 'listo' && totalPaginas > 1 && (
+            {totalPaginas > 1 && (
                 <Paginacion pagina={pagina} totalPaginas={totalPaginas} onCambiar={onCambiarPagina}/>
             )}
         </>
