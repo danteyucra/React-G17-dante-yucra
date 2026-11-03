@@ -23,6 +23,8 @@ export default function App() {
   const totalPaginas = Math.max(1, Math.ceil(total / PRODUCTOS_POR_PAGINA));
   const pagina = Math.max(1, Number(params.get('pagina')) || 1);
   function irAPagina(n : number) {
+    if(n === pagina) return;
+    setEstado('cargando');
     setParams(n <= 1 ? {} : { pagina: String(n) });
     window.scrollTo({ top: 0 });
   }
