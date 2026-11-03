@@ -3,6 +3,7 @@ import type { EstadoCarga, Producto } from "../../dominio/tipos";
 import SkeletonCard from "../components/SkeletonCard";
 import ProductCard from "../components/ProductCard";
 import Paginacion from "../components/Paginacion";
+import { useDebounce } from "../../aplicacion/useDebounce";
 import { useCart } from "../../aplicacion/useCart";
 
 interface Props {
@@ -13,20 +14,24 @@ interface Props {
     pagina : number;
     totalPaginas : number;
     onCambiarPagina : (n : number) => void;
+    consulta : string;
+    onBuscar : (texto : string) => void;
 }   
 const nombreTienda = 'Tienda Tech';
 
-export function Home ( {esRespaldo, OnReintentar, productos, estado, pagina, totalPaginas, onCambiarPagina} : Props) {
+export function Home ( {esRespaldo, OnReintentar, productos, estado, pagina, totalPaginas, onCambiarPagina, consulta, onBuscar} : Props) {
     const {agregar} = useCart();
     const categorias = ['todas', ...new Set(productos.map(p => p.categoria))];
     const [categoriaActiva, setCategoriaActiva] = useState<string>('todas');
-    const [termino, setTermino] = useState('');
-    const busqueda = termino.trim().toLowerCase();  
+    const [termino, setTermino] = useState(consulta);
+    const terminoDebounced = useDebounce(termino.trim(), 400);
+    const busqueda = consulta;
     const visibles = useMemo( () => productos.filter( (p) => (
-        (categoriaActiva === 'todas' || p.categoria === categoriaActiva) && 
-        (busqueda === '' || p.nombre.toLowerCase().includes(busqueda) || 
-        p.marca.toLowerCase().includes(busqueda))
-    )), [productos, categoriaActiva, busqueda]);
+        categoriaActiva === 'todas' || p.categoria === categoriaActiva
+    )), [productos, categoriaActiva]);
+    useEffect(() => {
+        if(terminoDebounced !== consulta) onBuscar(terminoDebounced);
+    }, [terminoDebounced, consulta, onBuscar]);
     useEffect(() => {
         document.title = `${nombreTienda} - ${visibles.length} resultados`;
     },[visibles.length]);
@@ -67,7 +72,7 @@ export function Home ( {esRespaldo, OnReintentar, productos, estado, pagina, tot
             <p className="mb-4 text-sm text-gray-500">{visibles.length} productos</p>
             {estado === 'listo' && visibles.length === 0 && (
                 <p className="text-gray-500">{
-                    busqueda !== '' ? `No encontramos productos para "${termino.trim()}"` : 'No hay productos en esta categoria'
+                    busqueda !== '' ? `No encontramos productos para "${busqueda}"` : 'No hay productos en esta categoria'
                 }</p>
             )}
             {estado === 'listo' && (

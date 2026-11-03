@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
-import type {EstadoCarga, Producto} from "./dominio/tipos"
+import type { EstadoCarga } from "./dominio/tipos"
+import { useApi } from "./aplicacion/useApi"
 import { obtenerProductos, PRODUCTOS_POR_PAGINA } from "./infraestructura/api"
 import Detalle from './ui/pages/Detalle';
 import { Route, Routes, useSearchParams } from "react-router-dom"
@@ -13,50 +13,41 @@ import Contacto from "./ui/pages/Contacto";
 import RutaProtegida from "./ui/components/RutaProtegida";
 
 export default function App() {
-
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [estado, setEstado] = useState<EstadoCarga>('cargando');
-  const [esRespaldo, setEsRespaldo] = useState(false);
-  const [intento, setIntento] = useState(0);
-  const [total, setTotal] = useState(0);
   const [params, setParams] = useSearchParams();
-  const totalPaginas = Math.max(1, Math.ceil(total / PRODUCTOS_POR_PAGINA));
   const pagina = Math.max(1, Number(params.get('pagina')) || 1);
+  const consulta = params.get('q') ?? '';
+  const { data, error, isLoading, refetch } = useApi(
+    (signal) => obtenerProductos(pagina, consulta, signal),
+    [pagina, consulta]
+  );
+  const productos = data?.productos ?? [];
+  const esRespaldo = data?.esRespaldo ?? false;
+  const totalPaginas = Math.max(1, Math.ceil((data?.total ?? 0) / PRODUCTOS_POR_PAGINA));
+  const estado : EstadoCarga = isLoading ? 'cargando' : error ? 'error' : 'listo';
+
   function irAPagina(n : number) {
     if(n === pagina) return;
-    setEstado('cargando');
-    setParams(n <= 1 ? {} : { pagina: String(n) });
+    setParams((p) => {
+      const siguiente = new URLSearchParams(p);
+      if(n <= 1) siguiente.delete('pagina'); else siguiente.set('pagina', String(n));
+      return siguiente;
+    });
     window.scrollTo({ top: 0 });
   }
-  useEffect(() => {
-    const controlador = new AbortController();
-    async function cargar () {
-      try {
-        const resultado = await obtenerProductos(pagina, controlador.signal);
-        setProductos(resultado.productos);
-        setTotal(resultado.total);
-        setEsRespaldo(resultado.esRespaldo);
-        setEstado('listo');
-      } catch (error) {
-        if(error instanceof DOMException && error.name === 'AbortError') return;
-        console.warn('Fallo imprevisto al cargar');
-        setEstado('error');
-      }
-    }
-    setEstado('cargando');
-    cargar();
-    return () => controlador.abort();
-  },[intento, pagina])
-  
+  function buscar(texto : string) {
+    setParams(texto ? { q: texto } : {}, { replace: true });
+  }
+
   return (
     <Routes>
       <Route element = {
         <Layout/>
       }>
         <Route path="/" element = {
-          <Home esRespaldo={esRespaldo} OnReintentar={() => {setIntento(intento + 1); setEstado('cargando')}}
+          <Home esRespaldo={esRespaldo} OnReintentar={refetch}
           productos={productos} estado={estado}
-          pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={irAPagina}/>
+          pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={irAPagina}
+          consulta={consulta} onBuscar={buscar}/>
         }
         />
         <Route  path="/producto/:id" element = {

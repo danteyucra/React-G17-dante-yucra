@@ -32,10 +32,11 @@ export interface PaginaProductos {
     esRespaldo : boolean;
 }
 
-export async function obtenerProductos(pagina : number, signal? : AbortSignal): Promise <PaginaProductos> {
+export async function obtenerProductos(pagina : number, consulta : string, signal? : AbortSignal): Promise <PaginaProductos> {
     const skip = (pagina - 1) * PRODUCTOS_POR_PAGINA;
     try {
-        const r = await fetch(`${BASE}/products?limit=${PRODUCTOS_POR_PAGINA}&skip=${skip}`, { signal });
+        const ruta = consulta ? `/products/search?q=${encodeURIComponent(consulta)}&` : '/products?';
+        const r = await fetch(`${BASE}${ruta}limit=${PRODUCTOS_POR_PAGINA}&skip=${skip}`, { signal });
         if(!r.ok) throw new Error (`HTTP ${r.status}`);
         const data = (await r.json()) as { products : ProductoAPI[]; total : number };
         return {
@@ -46,9 +47,12 @@ export async function obtenerProductos(pagina : number, signal? : AbortSignal): 
     } catch (error) {
         if(error instanceof DOMException && error.name === 'AbortError') throw error;
         console.warn('Api no disponible, usando el catalogo semilla.', error instanceof Error ? error.message : error);
+        const coincidencias = respaldo.filter((p) => (
+            p.nombre.toLowerCase().includes(consulta.toLowerCase()) || p.marca.toLowerCase().includes(consulta.toLowerCase())
+        ));
         return {
-            productos : respaldo.slice(skip, skip + PRODUCTOS_POR_PAGINA),
-            total : respaldo.length,
+            productos : coincidencias.slice(skip, skip + PRODUCTOS_POR_PAGINA),
+            total : coincidencias.length,
             esRespaldo : true
         };
     }
